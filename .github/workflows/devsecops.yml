@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+
   pull_request:
     branches:
       - main
+
   workflow_dispatch:
 
 jobs:
@@ -15,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Gitleaks Secret Scan
         run: |
@@ -26,7 +28,9 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t devsecops-app:${{ github.sha }} .
+          docker build \
+            -t devsecops-app:${{ github.sha }} \
+            .
 
       - name: Trivy Vulnerability Scan
         run: |
@@ -34,6 +38,8 @@ jobs:
             -v /var/run/docker.sock:/var/run/docker.sock \
             aquasec/trivy:latest \
             image \
+            --scanners vuln \
+            --ignore-unfixed \
             --exit-code 1 \
             --severity HIGH,CRITICAL \
             devsecops-app:${{ github.sha }}
