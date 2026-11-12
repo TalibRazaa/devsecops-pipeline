@@ -1,17 +1,27 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, Response
+from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
 import os
 
 app = Flask(__name__)
 
+REQUESTS = Counter("app_requests_total", "Total requests", ["endpoint"])
+
 
 @app.route("/")
 def home():
+    REQUESTS.labels("/").inc()
     return jsonify(status="ok", message="DevSecOps pipeline demo app")
 
 
 @app.route("/health")
 def health():
+    REQUESTS.labels("/health").inc()
     return jsonify(status="healthy"), 200
+
+
+@app.route("/metrics")
+def metrics():
+    return Response(generate_latest(), mimetype=CONTENT_TYPE_LATEST)
 
 
 if __name__ == "__main__":
