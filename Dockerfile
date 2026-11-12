@@ -1,6 +1,11 @@
 FROM python:3.12-slim
 
-# Run as non-root user (basic hardening step you can cite in interviews)
+# Patch OS-level vulnerabilities (e.g. zlib1g) found by Trivy
+RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
+# Run as non-root user
 RUN useradd -m appuser
 WORKDIR /app
 
